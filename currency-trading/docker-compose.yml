@@ -1,11 +1,18 @@
 version: '3.8'
 
 services:
-
-  db:
-    image: postgres
+  postgres:
+    image: postgres:latest
+    container_name: postgres
+    environment:
+      POSTGRES_USER: crypto-trading
+      POSTGRES_PASSWORD: changemelater!
+      POSTGRES_DB: crypto-trading
     ports:
       - "5432:5432"
-    restart: always
-    environment:
-      POSTGRES_PASSWORD: changemelater!
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    restart: unless-stopped
+
+volumes:
+  postgres_data:

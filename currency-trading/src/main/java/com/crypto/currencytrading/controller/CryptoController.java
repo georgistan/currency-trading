@@ -32,18 +32,22 @@ public class CryptoController {
     @PostMapping("/buy")
     public ResponseEntity<String> buy(@RequestBody TradeRequest req) {
         String result = service.buy(req);
+
         if (result.contains("Insufficient")) {
             return ResponseEntity.badRequest().body(result);
         }
+
         return ResponseEntity.ok(result);
     }
 
     @PostMapping("/sell")
     public ResponseEntity<String> sell(@RequestBody TradeRequest req) {
         String result = service.sell(req);
+
         if (result.contains("Insufficient")) {
             return ResponseEntity.badRequest().body(result);
         }
+
         return ResponseEntity.ok(result);
     }
 
@@ -55,6 +59,7 @@ public class CryptoController {
     @PostMapping("/reset")
     public ResponseEntity<String> reset() {
         service.reset();
+
         return ResponseEntity.ok("Reset successful.");
     }
 

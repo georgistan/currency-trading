@@ -1,7 +1,7 @@
 CREATE TABLE users (
     id SERIAL PRIMARY KEY,
     username VARCHAR(255) UNIQUE,
-    balance DOUBLE PRECISION
+    balance DOUBLE PRECISION DEFAULT 10000
 );
 
 CREATE TABLE transactions (
