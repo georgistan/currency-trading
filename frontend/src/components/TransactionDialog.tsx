@@ -37,16 +37,6 @@ export function TransactionDialog({ isOpen, onClose, onConfirm, currency, type, 
   const handleConfirm = () => {
     const numAmount = Number.parseFloat(amount)
 
-    // if (isNaN(numAmount) || numAmount <= 0) {
-    //   setError("Please enter a valid positive amount")
-    //   return
-    // }
-
-    // if (type === "buy" && numAmount > maxAmount) {
-    //   setError("Insufficient funds in your wallet")
-    //   return
-    // }
-
     onConfirm(numAmount)
   }
 

@@ -9,6 +9,21 @@ import java.util.stream.Collectors;
 
 public class KrakenWebSocketClient extends WebSocketClient {
 
+    private static final String DELIMITER = ",";
+    private static final String PREFIX = "[";
+    private static final String SUFFIX = "]";
+    private static final String QUOTATION_ESCAPE = "\"";
+
+    private static final String SUBSCRIBE_MESSAGE_FORMAT = """
+            {
+              "method": "subscribe",
+              "params": {
+                "channel": "ticker",
+                "symbol": %s
+              }
+            }
+            """;
+
     public KrakenWebSocketClient(URI serverUri) {
         super(serverUri);
     }
@@ -25,18 +40,10 @@ public class KrakenWebSocketClient extends WebSocketClient {
         );
 
         String symbolsJsonArray = pairs.stream()
-            .map(s -> "\"" + s + "\"")
-            .collect(Collectors.joining(", ", "[", "]"));
+            .map(s -> QUOTATION_ESCAPE + s + QUOTATION_ESCAPE)
+            .collect(Collectors.joining(DELIMITER, PREFIX, SUFFIX));
 
-        String subscribeMessage = String.format("""
-            {
-              "method": "subscribe",
-              "params": {
-                "channel": "ticker",
-                "symbol": %s
-              }
-            }
-            """, symbolsJsonArray);
+        String subscribeMessage = String.format(SUBSCRIBE_MESSAGE_FORMAT, symbolsJsonArray);
 
         send(subscribeMessage);
     }

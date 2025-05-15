@@ -1,3 +1,7 @@
+DROP TABLE IF EXISTS "holdings";
+DROP TABLE IF EXISTS "transactions";
+DROP TABLE IF EXISTS "users";
+
 CREATE TABLE users (
     id SERIAL PRIMARY KEY,
     username VARCHAR(255) UNIQUE,

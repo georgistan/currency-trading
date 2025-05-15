@@ -7,7 +7,6 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.annotation.PostConstruct;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 
 import java.net.URI;
@@ -19,7 +18,7 @@ import java.util.concurrent.ConcurrentHashMap;
 public class KrakenTickerService {
 
     private static final String KRAKEN_URI = "wss://ws.kraken.com/v2";
-    private final SimpMessagingTemplate messagingTemplate;
+
     private KrakenWebSocketClient client;
     private FrontendWebSocketService frontendWebSocketService;
     private ObjectMapper objectMapper;
@@ -28,11 +27,9 @@ public class KrakenTickerService {
 
     @Autowired
     public KrakenTickerService(
-        SimpMessagingTemplate messagingTemplate,
         FrontendWebSocketService frontendWebSocketService,
         ObjectMapper objectMapper
     ) {
-        this.messagingTemplate = messagingTemplate;
         this.frontendWebSocketService = frontendWebSocketService;
         this.objectMapper = objectMapper;
     }
@@ -52,19 +49,13 @@ public class KrakenTickerService {
                     }
 
                     extracted = extracted.path("data");
+
                     if (!extracted.isEmpty() && extracted.isArray()) {
                         extracted = extracted.get(0);
 
-                        String symbol = extracted.path("symbol").asText(null);
-                        double lastPrice = extracted.path("last").asDouble(Double.NaN);
+                        TickerDataDTO mappedData = mapData(extracted);
 
-                        TickerDataDTO tickerDataDTO = new TickerDataDTO();
-                        tickerDataDTO.setSymbol(symbol);
-                        tickerDataDTO.setPrice(lastPrice);
-
-                        frontendWebSocketService.broadcastCryptoPrice(tickerDataDTO);
-
-                        tickerCache.put(symbol, lastPrice);
+                        broadcastAndSaveData(mappedData);
                     }
                 }
             };
@@ -77,5 +68,18 @@ public class KrakenTickerService {
 
     public Map<String, Double> getTickerCache() {
         return Collections.unmodifiableMap(tickerCache);
+    }
+
+    private TickerDataDTO mapData(JsonNode extracted) {
+        TickerDataDTO tickerDataDTO = new TickerDataDTO();
+        tickerDataDTO.setSymbol(extracted.path("symbol").asText(null));
+        tickerDataDTO.setPrice(extracted.path("last").asDouble(Double.NaN));
+
+        return tickerDataDTO;
+    }
+
+    private void broadcastAndSaveData(TickerDataDTO tickerDataDTO) {
+        frontendWebSocketService.broadcastCryptoPrice(tickerDataDTO);
+        tickerCache.put(tickerDataDTO.getSymbol(), tickerDataDTO.getPrice());
     }
 }
